@@ -1,3 +1,18 @@
+
+/*-------------------------------------------------------------------------
+ *
+ *  pg_dropcache.c
+ *
+ *
+ *	Portions Copyright (c) 2018, Ildar Musin
+ *  https://github.com/zilder/pg_dropcache
+ *
+ *   
+ *  Portions Copyright (c) 2025, Pierre Forstmann
+ *
+ *-------------------------------------------------------------------------
+ */
+
 #include "postgres.h"
 #include "storage/bufmgr.h"
 #include "utils/syscache.h"
@@ -5,6 +20,7 @@
 #include "access/htup_details.h"
 #include "miscadmin.h"
 #include "catalog/pg_class.h"
+#include "storage/smgr.h"
 
 PG_MODULE_MAGIC;
 
@@ -22,20 +38,23 @@ Datum
 pg_drop_rel_cache(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
-	int			forkNum;
 	HeapTuple	tp;
-	RelFileNodeBackend	rnode;
+	RelFileLocatorBackend	rnode;
+	BlockNumber	nblocks = 0;
+    ForkNumber  forks[MAX_FORKNUM];
+	SMgrRelation srel;
+	int         nforks = 0;
 
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
 		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
 	
-		rnode.node.relNode = reltup->relfilenode;
-		rnode.node.spcNode = (reltup->reltablespace == InvalidOid) ?
+		rnode.locator.relNumber = reltup->relfilenode;
+		rnode.locator.spcOid = (reltup->reltablespace == InvalidOid) ?
 			MyDatabaseTableSpace :
 			reltup->reltablespace;
-		rnode.node.dbNode = MyDatabaseId;
+		rnode.locator.dbOid = MyDatabaseId;
 		rnode.backend = InvalidBackendId;
 
 		ReleaseSysCache(tp);
@@ -46,9 +65,19 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 		PG_RETURN_VOID();
 	}
 
-	forkNum = PG_ARGISNULL(1) ? 0 : forkname_to_number(text_to_cstring(PG_GETARG_TEXT_P(1)));
-	for (; forkNum <= MAX_FORKNUM; ++forkNum)
-		DropRelFileNodeBuffers(rnode, forkNum, 0);
+	/*
+	 * see RelationTruncate (storage.c) 
+	 *     -> smgrtruncate (smgr.c)
+	 *        -> DropRelationBuffers (bufmgr.c)
+	 */
+	forks[nforks] = MAIN_FORKNUM;
+	nforks = 1;
+	/*
+	 * TO DO: take into account FSM and visibility map
+	 */
+	srel  = smgropen(rnode.locator, InvalidBackendId);
+	DropRelationBuffers(srel, forks, nforks, &nblocks);
+
 
 	PG_RETURN_VOID();
 }
