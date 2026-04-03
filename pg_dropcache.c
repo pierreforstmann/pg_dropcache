@@ -46,7 +46,9 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 	SMgrRelation 		srel;
 	Relation 		rel;
 	int         		nforks = 0;
-
+#if PG_VERSION_NUM < 140000
+	RelFileNodeBackend	relfnode;
+#endif
 	/*
 	 * see RelationTruncate (storage.c) 
 	 *     -> smgrtruncate (smgr.c)
@@ -62,9 +64,14 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 #if PG_VERSION_NUM >= 160000
 		srel = smgropen(rel->rd_locator, rel->rd_backend);
 		DropRelationBuffers(srel, forks, nforks, &nblocks);
-#else
+#elif PG_VERSION_NUM >=140000
 		srel  = smgropen(rel->rd_node, InvalidBackendId);
 		DropRelFileNodeBuffers(srel, forks, nforks, &nblocks);
+#else
+		srel  = smgropen(rel->rd_node, InvalidBackendId);
+		relfnode.node = rel->rd_node;
+		relfnode.backend = InvalidBackendId;
+		DropRelFileNodeBuffers(relfnode, forks, nforks, &nblocks);
 #endif
 		smgrclose(srel);
 		relation_close(rel, AccessShareLock);
