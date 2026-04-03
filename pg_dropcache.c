@@ -23,7 +23,11 @@
 #include "storage/smgr.h"
 #include "common/relpath.h"
 #include "utils/rel.h"
+#if PG_VERSION_NUM >= 120000
 #include "access/relation.h"
+#else
+#include "nodes/relation.h"
+#endif
 
 PG_MODULE_MAGIC;
 
@@ -43,7 +47,9 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 	Oid			relid = PG_GETARG_OID(0);
 	BlockNumber		nblocks = 0;
 	SMgrRelation 		srel;
+#if PG_VERSION_NUM >= 120000
 	Relation 		rel;
+#endif
 #if PG_VERSION_NUM >= 130000
 	ForkNumber  		forks[MAX_FORKNUM];
 	int         		nforks = 0;
@@ -63,7 +69,12 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 		forks[0] = fork;
 		nforks = 1;
 #endif
+#if PG_VERSION_NUM >= 120000
 		rel = relation_open(relid, AccessShareLock);
+#else
+		Relation rel = RelationIdGetRelation(relid);
+		RelationOpenSmgr(rel);
+#endif
 #if PG_VERSION_NUM >= 160000
 		srel = smgropen(rel->rd_locator, rel->rd_backend);
 		DropRelationBuffers(srel, forks, nforks, &nblocks);
@@ -82,7 +93,11 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 		DropRelFileNodeBuffers(relfnode, fork, nblocks);
 #endif
 		smgrclose(srel);
+#if PG_VERSION_NUM >= 120000
 		relation_close(rel, AccessShareLock);
+#else
+		RelationClose(rel);
+#endif
 	}
 
 	PG_RETURN_VOID();
