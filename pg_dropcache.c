@@ -42,10 +42,12 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	BlockNumber		nblocks = 0;
-	ForkNumber  		forks[MAX_FORKNUM];
 	SMgrRelation 		srel;
 	Relation 		rel;
+#if PG_VERSION_NUM >= 130000
+	ForkNumber  		forks[MAX_FORKNUM];
 	int         		nforks = 0;
+#endif
 #if PG_VERSION_NUM < 140000
 	RelFileNodeBackend	relfnode;
 #endif
@@ -57,9 +59,10 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 
 	for (ForkNumber fork = 0; fork < MAX_FORKNUM; fork++)
 	{
+#if PG_VERSION_NUM >= 130000
 		forks[0] = fork;
 		nforks = 1;
-
+#endif
 		rel = relation_open(relid, AccessShareLock);
 #if PG_VERSION_NUM >= 160000
 		srel = smgropen(rel->rd_locator, rel->rd_backend);
@@ -67,11 +70,16 @@ pg_drop_rel_cache(PG_FUNCTION_ARGS)
 #elif PG_VERSION_NUM >=140000
 		srel  = smgropen(rel->rd_node, InvalidBackendId);
 		DropRelFileNodeBuffers(srel, forks, nforks, &nblocks);
-#else
+#elif PG_VERSION_NUM >= 130000
 		srel  = smgropen(rel->rd_node, InvalidBackendId);
 		relfnode.node = rel->rd_node;
 		relfnode.backend = InvalidBackendId;
 		DropRelFileNodeBuffers(relfnode, forks, nforks, &nblocks);
+#else
+		srel  = smgropen(rel->rd_node, InvalidBackendId);
+		relfnode.node = rel->rd_node;
+		relfnode.backend = InvalidBackendId;
+		DropRelFileNodeBuffers(relfnode, fork, nblocks);
 #endif
 		smgrclose(srel);
 		relation_close(rel, AccessShareLock);
