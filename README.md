@@ -23,25 +23,13 @@ create extension pg_dropcache;
 To clear whole buffer cache run:
 
 ```
-select pg_dropcache();
+select pg_drop_cache();
 ```
 
 To clear cache buffers for just a single relation:
 
 ```
-select pg_drop_rel_cache(<relation>);
+select pg_drop_rel_cache(<relation oid>);
 ```
-
-If you need to clear a specific buffer cache, you can specify it as second parameter:
-
-```
-select pg_drop_rel_cache(<relation>, <fork>);
-```
-
-`fork` can have one of the following values:
-* 'main'
-* 'vm'
-* 'fsm'
-* 'init'
 
 Have fun!
