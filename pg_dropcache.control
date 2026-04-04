@@ -1,5 +1,5 @@
 # pg_dropcache extension
 comment = 'clears buffer cache'
-default_version = '0.2'
+default_version = '1.0.0'
 module_pathname = '$libdir/pg_dropcache'
 relocatable = true

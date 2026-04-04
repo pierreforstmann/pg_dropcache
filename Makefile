@@ -7,7 +7,7 @@ REGRESS=test
 REGRESS_OPTS = --temp-instance=/tmp/5555 --port=5555
 
 EXTENSION = pg_dropcache
-DATA = pg_dropcache--0.2.sql
+DATA = pg_dropcache--1.0.0.sql
 PGFILEDESC = "pg_dropcache - clears buffer cache"
 
 PG_CONFIG = pg_config
