@@ -5,9 +5,9 @@
 PostgreSQL supported versions are 11, 12, 13, 14, 15 and 16.
 
 PostgreSQL 17 and 18 are not supported because pg_buffercache extension provides new following functions:
-- pg_buffercache_evict() 
-- pg_buffercache_evict_relation() 
-- pg_buffercache_evict_all()
+- `pg_buffercache_evict()`
+- `pg_buffercache_evict_relation()`
+- `pg_buffercache_evict_all()`
 
 ## Installation
 
