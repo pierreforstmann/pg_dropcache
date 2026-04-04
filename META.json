@@ -19,7 +19,7 @@
       }
    },
    "provides": {
-     "pg_readonly": {
+     "pg_dropcache": {
          "abstract": "drop buffer cache",
          "file": "pg_dropcache.c",
          "docfile": "README.md",
