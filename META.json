@@ -1,0 +1,48 @@
+{
+   "name": "pg_dropache",
+   "abstract": "drop buffer cache",
+   "version": "1.0.0",
+   "maintainer": [
+      "Pierre Forstmann"
+   ],
+   "license": {
+      "PostgreSQL": "http://www.postgresql.org/about/licence"
+   },
+   "prereqs": {
+      "runtime": {
+         "requires": {
+            "PostgreSQL": "9.5.21"
+         },
+         "recommends": {
+            "PostgreSQL": "9.5.21"
+         }
+      }
+   },
+   "provides": {
+     "pg_readonly": {
+         "abstract": "drop buffer cache",
+         "file": "pg_dropcache.c",
+         "docfile": "README.md",
+         "version": "1.0.0"
+      }
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "http://github.com/pierreforstmann/pg_dropcache/issues"
+      },
+      "repository": {
+        "url":  "https://github.com/pierreforstmann/pg_dropcache.git",
+        "web":  "https://github.com/pierreforstmann/pg_dropcache",
+        "type": "git"
+      }
+   },
+   "generated_by": "Pierre Forstmann",
+   "meta-spec": {
+      "version": "1.0.0",
+      "url": "http://pgxn.org/meta/spec.txt"
+   },
+   "tags": [
+      "drop buffer cache",
+      "evict buffer cache"
+   ]
+}

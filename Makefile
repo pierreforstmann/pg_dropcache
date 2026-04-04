@@ -13,3 +13,6 @@ PGFILEDESC = "pg_dropcache - clears buffer cache"
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
+
+pgxn:
+	git archive --format zip  --output ../pgxn/pg_dropcache/pg_dropcache-1.0.0.zip master
