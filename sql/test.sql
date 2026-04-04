@@ -1,11 +1,33 @@
 create extension pg_dropcache;
 create extension pg_buffercache;
+--
 create table t(x int);
-insert into t select * from generate_series(1,1000000);
-select page_count > 4000 from (
+insert into t select * from generate_series(1, 1000000);
+select page_count > 4000 as page_count_gt_4000 from (
   select count(*) as page_count from pg_buffercache where relfilenode = pg_relation_filenode('t'::regclass)
 ) as foo;
-select pg_drop_rel_cache('t'::regclass);
-select count(*) from pg_buffercache where relfilenode = pg_relation_filenode('t'::regclass); 
 
+select pg_drop_rel_cache('t'::regclass);
+
+select count(*) from pg_buffercache where relfilenode = pg_relation_filenode('t'::regclass); 
+--
+create table t1(x int);
+create table t2(x int primary key);
+insert into t1 select * from generate_series(1, 1000000);
+insert into t2 select * from generate_series(1, 1000000);
+select page_count_t1 > 4000 as page_count_t1_gt_4000 from (
+  select count(*) as page_count_t1 from pg_buffercache where relfilenode = pg_relation_filenode('t1'::regclass)
+) as foo;
+select page_count_t2 > 4000 as page_count_t2_gt_4000 from (
+  select count(*) as page_count_t2 from pg_buffercache where relfilenode = pg_relation_filenode('t2'::regclass)
+) as foo;
+select page_count_t2_pkey > 40 as page_count_t2_pkey_gt_40 from (
+  select count(*) as page_count_t2_pkey from pg_buffercache where relfilenode = pg_relation_filenode('t2_pkey'::regclass)
+) as foo;
+
+select pg_drop_cache();
+
+select count(*) from pg_buffercache where relfilenode = pg_relation_filenode('t1'::regclass); 
+select count(*) from pg_buffercache where relfilenode = pg_relation_filenode('t2'::regclass); 
+select count(*) from pg_buffercache where relfilenode = pg_relation_filenode('t2_pkey'::regclass);
 
