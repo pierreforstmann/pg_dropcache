@@ -4,7 +4,7 @@
 
 PostgreSQL supported versions are 11, 12, 13, 14, 15 and 16.
 
-PostgreSQL 17 and 18 are not supported because pg_buffercache extension provides new following functions:
+PostgreSQL 17 and 18 are not supported because `pg_buffercache` extension provides following new functions:
 - `pg_buffercache_evict()`
 - `pg_buffercache_evict_relation()`
 - `pg_buffercache_evict_all()`
@@ -27,7 +27,7 @@ create extension pg_dropcache;
 
 **WARNING**: Dirty pages will be just dropped, therefore they won't be flushed on the disk! It should be used with extreme caution!
 
-To clear whole buffer cache run:
+To clear whole buffer cache for the current database run:
 
 ```
 select pg_drop_cache();
