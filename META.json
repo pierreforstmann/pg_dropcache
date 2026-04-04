@@ -1,5 +1,5 @@
 {
-   "name": "pg_dropache",
+   "name": "pg_dropcache",
    "abstract": "drop buffer cache",
    "version": "1.0.0",
    "maintainer": [
